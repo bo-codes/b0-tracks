@@ -31,24 +31,25 @@ const newError = (error) => ({
 //THUNKS//
 //SONG THUNKS
 export const createSongThunk = (song) => async (dispatch) => {
+  //console
   const response = await csrfFetch(`/api/songs/`, {
     method: "POST",
     headers: {
-      Accept: "application/json",
       "Content-Type": "application/json",
     },
     body: JSON.stringify(song),
   });
-
+  console.log("RESPONSE", response);
   if (response.ok) {
+    //console
     const song = await response.json();
     dispatch(createSongAction(song));
-  } else {
-    const error = {
-      status_code: response.status,
-      error_desc: "increment_frame failed",
-    };
-    dispatch(newError(error));
+    // } else {
+    //   const error = {
+    //     status_code: response.status,
+    //     error_desc: "increment_frame failed",
+    //   };
+    //   dispatch(newError(error));
   }
 };
 
@@ -60,12 +61,12 @@ export const getAllSongsThunk = () => async (dispatch) => {
     // return songs;
     dispatch(getAllSongsAction(songs));
     return response;
-  } else {
-    const error = {
-      status_code: response.status,
-      error_desc: "increment_frame failed",
-    };
-    dispatch(newError(error));
+  // } else {
+  //   const error = {
+  //     status_code: response.status,
+  //     error_desc: "increment_frame failed",
+  //   };
+  //   dispatch(newError(error));
   }
 };
 
@@ -81,7 +82,7 @@ export const getAllSongsThunk = () => async (dispatch) => {
 
 
 //REDUCER
-const initalState = {songs: null}
+const initalState = {songs: []}
 export default function songReducer(state = initalState, action) {
 
   let newState;
@@ -89,25 +90,21 @@ export default function songReducer(state = initalState, action) {
   switch (action.type) {
     case create:
       //create structure of new object in state.
-      const new_song = {
-        id: action.song.id,
-        title: action.song.title,
-        url: action.song.url,
-        description: action.song.description,
-      };
-
-      return {
-        ...state,
-        [action.song.id]: new_song,
-        songs: [new_song, ...state.songs],
-      };
+      newState = {...state, songs:[...state.songs]}
+      newState[action.song.id] = action.song
+      newState.songs.push(action.song)
+      return newState;
 
     case get:
       // return {
       //   ...state,
       //   songs: {...action.songs}
       // };
-      newState = Object.assign({}, state, { songs: action.songs });
+      newState = {}
+      action.songs.forEach(song => {
+        newState[song.id] = song
+      });
+      newState.songs = action.songs
       return newState;
 
     // case remove:

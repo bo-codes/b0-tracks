@@ -8,7 +8,7 @@ import SignupFormPage from "./components/SignupFormPage";
 import Navigation from "./components/Navigation";
 import UsersList from "./components/UsersList";
 import User from "./components/User";
-import Songs from "./components/SongList/SongList";
+import SongList from "./components/SongList/SongList";
 // import PlaylistForm from "./components/PlaylistForm";
 
 function App() {
@@ -27,7 +27,7 @@ function App() {
 
   return (
     <>
-      <Songs />
+      <SongList />
       <Navigation isLoaded={isLoaded} />
       {isLoaded && (
         <Switch>
