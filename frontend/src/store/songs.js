@@ -6,17 +6,12 @@ const get = "songs/GET";
 const remove = "songs/DELETE";
 const setErr = "error/newError";
 
-// //comment switch cases
-// const createComment = "comment/CREATE";
-// const getComment = "comment/GET";
-// const removeComment = "comment/DELETE";
-
 //ACTIONS//
 //SONG ACTIONS
-// const createSongAction = (song) => ({
-//   type: create,
-//   song,
-// });
+const createSongAction = (song) => ({
+  type: create,
+  song,
+});
 
 const getAllSongsAction = (songs) => ({
   type: get,
@@ -33,46 +28,29 @@ const newError = (error) => ({
   error,
 });
 
-//COMMENT ACTIONS
-// const addCommentAction = (comment) => ({
-//   type: createComment,
-//   comment,
-// });
-
-// const getAllCommentsAction = (comments) => ({
-//   type: getComment,
-//   comments,
-// });
-
-// const deleteCommentAction = (ids) => ({
-//   type: removeComment,
-//   ...ids,
-// });
-
-
 //THUNKS//
 //SONG THUNKS
-// export const createSongThunk = (song) => async (dispatch) => {
-//   const response = await csrfFetch(`/api/songs/`, {
-//     method: "POST",
-//     headers: {
-//       Accept: "application/json",
-//       "Content-Type": "application/json",
-//     },
-//     body: JSON.stringify(song),
-//   });
+export const createSongThunk = (song) => async (dispatch) => {
+  const response = await csrfFetch(`/api/songs/`, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(song),
+  });
 
-//   if (response.ok) {
-//     const song = await response.json();
-//     dispatch(createSongAction(song));
-//   } else {
-//     const error = {
-//       status_code: response.status,
-//       error_desc: "increment_frame failed",
-//     };
-//     dispatch(newError(error));
-//   }
-// };
+  if (response.ok) {
+    const song = await response.json();
+    dispatch(createSongAction(song));
+  } else {
+    const error = {
+      status_code: response.status,
+      error_desc: "increment_frame failed",
+    };
+    dispatch(newError(error));
+  }
+};
 
 export const getAllSongsThunk = () => async (dispatch) => {
   const response = await csrfFetch("/api/songs/");
@@ -81,6 +59,7 @@ export const getAllSongsThunk = () => async (dispatch) => {
     console.log("songs:: ", songs);
     // return songs;
     dispatch(getAllSongsAction(songs));
+    return response;
   } else {
     const error = {
       status_code: response.status,
@@ -100,105 +79,36 @@ export const getAllSongsThunk = () => async (dispatch) => {
 //   }
 // };
 
-// //COMMENTS THUNKS
-// export const createCommentThunk = (comment) => async (dispatch) => {
-//   const response = await csrfFetch("/api/comments", {
-//     method: "song",
-//     headers: {
-//       Accept: "application/json",
-//       "Content-Type": "application/json",
-//     },
-//     body: JSON.stringify(comment),
-//   });
-
-//   if (response.ok) {
-//     const comment = await response.json();
-//     dispatch(addCommentAction(comment));
-//   } else {
-//     const error = {
-//       status_code: response.status,
-//       error_desc: "createCommentThunk failed",
-//     };
-//     dispatch(newError(error));
-//   }
-// };
-
-// export const getAllCommentsThunk = () => async (dispatch) => {
-//   const response = await csrfFetch("/api/songs/comments");
-//   if (response.ok) {
-//     const { comments } = await response.json();
-//     dispatch(getAllCommentsAction(comments));
-//   } else {
-//     const error = {
-//       status_code: response.status,
-//       error_desc: "increment_frame failed",
-//     };
-//     dispatch(newError(error));
-//   }
-// };
-
-// export const deleteCommentThunk = (ids) => async (dispatch) => {
-//   const response = await csrfFetch(
-//     `/api/songs/delete/comment/${ids.comment_id}`,
-//     {
-//       method: "DELETE",
-//     }
-//   );
-
-//   if (response.ok) {
-//     dispatch(deleteCommentAction(ids));
-//   }
-// };
-
 
 //REDUCER
 const initalState = {songs: null}
 export default function songReducer(state = initalState, action) {
-  // const update_keys = (array) => {
-  //   const obj = {};
-  //   array.forEach((i) => {
-  //     obj[i.id] = i;
-  //     if (i.hasOwnProperty("comments")) {
-  //       obj[i.id].comments = { ...update_keys(i.comments), all: i.comments };
-  //     } else if (i.hasOwnProperty("subcomments")) {
-  //       obj[i.id].subcomments = {
-  //         ...update_keys(i.subcomments),
-  //         all: i.subcomments,
-  //       };
-  //     }
-  //   });
-  //   // console.log("\narray param in update_keys(), array:: ", array)
-  //   // console.log("\nfilled object in update_keys(), obj:: ", obj)
-  //   return obj;
-  // };
 
-
-  const newState = { ...state };
+  let newState;
 
   switch (action.type) {
-    // case create:
-    //   //create structure of new object in state.
-    //   const new_song = {
-    //     id: action.song.id,
-    //     title: action.song.title,
-    //     url: action.song.url,
-    //     description: action.song.description,
-    //   };
+    case create:
+      //create structure of new object in state.
+      const new_song = {
+        id: action.song.id,
+        title: action.song.title,
+        url: action.song.url,
+        description: action.song.description,
+      };
 
-    //   //Normalize new object into slice of state, and insert new object into appropriate place in new array literal:
-    //   return {
-    //     ...state,
-    //     [action.song.id]: new_song,
-    //     allSongs: [new_song, ...state.allSongs],
-    //   };
-
-    case get:
-      //You may need to normalize objects from database if your store is not in sync with backend. Normalize redux using a helper function:
       return {
         ...state,
-        // ...update_keys(action.songs),
-        allSongs: {...state.songs, [action.song.id]: action.song}
+        [action.song.id]: new_song,
+        songs: [new_song, ...state.songs],
       };
+
+    case get:
+      // return {
+      //   ...state,
+      //   songs: {...action.songs}
+      // };
+      newState = Object.assign({}, state, { songs: action.songs });
+      return newState;
 
     // case remove:
     //   delete newState[action.songId];
