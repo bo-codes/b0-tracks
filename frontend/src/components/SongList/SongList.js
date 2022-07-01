@@ -5,6 +5,7 @@ import {
   deleteSongThunk,
 } from "../../store/songs";
 import UploadForm from "../SongForm/SongForm";
+import EditForm from "../SongEditForm/SongEditForm";
 
 export default function SongList() {
   const dispatch = useDispatch();
@@ -20,9 +21,10 @@ export default function SongList() {
 
   const reducerSongs = useSelector((state) => state.songReducer.songs);
   console.log("in component, reducerSongs:: ", reducerSongs);
-  // const DeleteSongActionHandler = (songId) => {
-  //   dispatch(deleteSongThunk(songId));
-  // };
+
+  const DeleteSongActionHandler = (song) => {
+    dispatch(deleteSongThunk(song));
+  };
 
   console.log("REDUCER SONGS", reducerSongs)
   return (
@@ -33,6 +35,13 @@ export default function SongList() {
             <h1>{song.id}</h1>
             <h1>{song.title}</h1>
             <h1>{song.userId}</h1>
+            <button
+              value={song}
+              onClick={(e) => DeleteSongActionHandler(song)}
+            >
+              delete
+            </button>
+            <EditForm song={song}/>
           </li>
         ))}
       </ol>

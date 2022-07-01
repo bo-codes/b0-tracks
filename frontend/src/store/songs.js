@@ -3,6 +3,7 @@ import { csrfFetch } from "./csrf";
 //song switch cases
 const create = "songs/CREATE";
 const get = "songs/GET";
+const update = "songs/UPDATE"
 const remove = "songs/DELETE";
 const setErr = "error/newError";
 
@@ -18,10 +19,16 @@ const getAllSongsAction = (songs) => ({
   songs,
 });
 
-// const deleteSongAction = (songId) => ({
-//   type: remove,
-//   songId: songId,
-// });
+const updateSong = (song) => ({
+  type: update,
+  song
+});
+
+const deleteSongAction = (songs) => ({
+  type: remove,
+  songs,
+  // songId,
+});
 
 const newError = (error) => ({
   type: setErr,
@@ -31,7 +38,7 @@ const newError = (error) => ({
 //THUNKS//
 //SONG THUNKS
 export const createSongThunk = (song) => async (dispatch) => {
-  //console
+  console.log("SONGOBJTHUNK", song)
   const response = await csrfFetch(`/api/songs/`, {
     method: "POST",
     headers: {
@@ -44,6 +51,7 @@ export const createSongThunk = (song) => async (dispatch) => {
     //console
     const song = await response.json();
     dispatch(createSongAction(song));
+    return response;
     // } else {
     //   const error = {
     //     status_code: response.status,
@@ -70,15 +78,30 @@ export const getAllSongsThunk = () => async (dispatch) => {
   }
 };
 
-// export const deleteSongThunk = (songId) => async (dispatch) => {
-//   const response = await csrfFetch(`/api/songs/delete/song/${songId}`, {
-//     method: "DELETE",
-//   });
+export const updateSongThunk = (song) => async (dispatch) => {
+  const response = await csrfFetch(`/api/songs/${song.id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(song),
+  });
 
-//   if (response.ok) {
-//     dispatch(deleteSongAction(songId));
-//   }
-// };
+  if(response.ok) {
+    const song = await response.json();
+    dispatch(updateSong(song))
+    return song;
+  }
+}
+
+export const deleteSongThunk = (song) => async (dispatch) => {
+  const response = await csrfFetch(`/api/songs/delete/song/${song.id}`, {
+    method: "DELETE",
+    body: JSON.stringify(song)
+  });
+
+  if (response.ok) {
+    const  songs  = await response.json();
+    dispatch(deleteSongAction(songs));
+  }
+};
 
 
 //REDUCER
@@ -107,19 +130,34 @@ export default function songReducer(state = initalState, action) {
       newState.songs = action.songs
       return newState;
 
-    // case remove:
-    //   delete newState[action.songId];
+    case update:
+      newState = {...state, songs:[...state.songs]}
+      newState[action.song.id] = action.song
+      return newState;
 
-    //   //Mutate a COPY of the old array, find object by id and splice it out:
-    //   newState.getAllSongsAction.splice(
-    //     newState.getAllSongsAction.findIndex((p) => p.id === action.songId),
-    //     1
-    //   );
+    case remove:
+      newState = {};
+      console.log("NEWSTATE SONGS IN DELETE", action)
+      action.songs.forEach((song) => {
+        newState[song.id] = song;
+      });
+      newState.songs = action.songs;
 
-    //   //Overwrite array key with new array value:
-    //   newState.getAllSongsAction = [...newState.getAllSongsAction];
+      newState.songs.splice(
+        newState.songs.findIndex((s) => s.id === action.songId),
+        1
+      );
+      delete newState[action.songId];
 
-    //   return newState;
+      // newState.songs = action.songs
+
+      //Mutate a COPY of the old array, find object by id and splice it out:
+
+
+      // //Overwrite array key with new array value:
+      // newState.songs = [...newState.songs];
+
+      return newState;
 
     //comments cases ================================================
     // case createComment: {

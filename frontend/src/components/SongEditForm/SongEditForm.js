@@ -1,50 +1,66 @@
 import React, { useEffect, useState } from "react";
-import { createSongThunk } from "../../store/songs";
+import { updateSongThunk, getAllSongsThunk } from "../../store/songs";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory, useParams } from "react-router-dom";
 
-
-
-export default function UploadForm() {
+export default function EditForm({song}) {
   const [coverImg, setCoverImg] = useState("");
   const [title, setTitle] = useState("");
   const [artist, setArtist] = useState("");
   const [url, setUrl] = useState(null);
   const [description, setDescription] = useState(null);
-  const [validationErrors, setValidationErrors] = useState([])
+  const [validationErrors, setValidationErrors] = useState([]);
 
   //USEFFECT
   useEffect(() => {
     const errors = [];
 
-    if(!title.length) {
-      errors.push('Song must have title')
+    if (!title.length) {
+      errors.push("Song must have title");
     }
-    if(!artist.length) {
-      errors.push('Song must have artist')
+    if (!artist.length) {
+      errors.push("Song must have artist");
     }
-    if(!coverImg.length) {
-      errors.push('Song must have cover image')
+    if (!coverImg.length) {
+      errors.push("Song must have cover image");
     }
-    if(!coverImg.endsWith('.jpg')) {
-      errors.push('File must be in jpg format')
+    if (!coverImg.endsWith(".jpg")) {
+      errors.push("File must be in jpg format");
     }
 
-    setValidationErrors(errors)
-  }, [title, artist, coverImg])
+    setValidationErrors(errors);
+  }, [title, artist, coverImg]);
 
   const dispatch = useDispatch();
 
+  const GetAllSongsActionHandler = () => {
+    dispatch(getAllSongsThunk());
+  };
+
+  const UpdateSongActionHandler = (updatedSong) => {
+    dispatch(updateSongThunk(updatedSong))
+  }
+
+  useEffect(() => {
+    GetAllSongsActionHandler();
+  }, [dispatch]);
+
+
+  const reducerSongs = useSelector((state) => state.songReducer.songs);
+
   const history = useHistory();
 
-  const {userId} =useParams();
+  const { userId } = useParams();
 
   // const songs = useSelector((state) => state.songsReducer.songs);
 
-  const handleSubmit = async(e) => {
+  const handleSubmit = async (e) => {
     //console
+    console.log("TARGET ID", song.id)
     e.preventDefault();
-    const song = {
+    console.log("PASSED IN SONG", song.title)
+    const updatedSong = {
+      id: song.id,
       coverImg,
       title,
       artist,
@@ -55,7 +71,7 @@ export default function UploadForm() {
       // playlistId,
     };
     //console
-    await dispatch(createSongThunk(song));
+    await UpdateSongActionHandler(updatedSong);
     //console
     history.push(`/`);
   };
@@ -65,11 +81,9 @@ export default function UploadForm() {
       <div>
         <form onSubmit={handleSubmit}>
           <ul>
-            {
-              validationErrors.map(err => (
-                <li key={err}>{err}</li>
-              ))
-            }
+            {validationErrors.map((err) => (
+              <li key={err}>{err}</li>
+            ))}
           </ul>
           <input
             type="text"
@@ -107,9 +121,7 @@ export default function UploadForm() {
             onChange={(e) => setUrl(e.target.value)}
             required
           />
-          <button type="submit">
-            Submit
-          </button>
+          <button type="submit">Submit</button>
         </form>
       </div>
     </div>
